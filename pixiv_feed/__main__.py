@@ -15,6 +15,12 @@ CACHEDIR = Path(APPDIRS.user_cache_dir)
 DATADIR = Path(APPDIRS.user_data_dir)
 
 
+class MyAppPixivAPI(AppPixivAPI):
+    def __init__(self, *kargs, **kwargs):
+        self.expiry = None
+        return super().__init__(*kargs, **kwargs)
+
+
 def create_parser():
     parser = argparse.ArgumentParser()
     addarg = parser.add_argument
@@ -31,36 +37,34 @@ def create_parser():
     return parser
 
 
-def init_pixiv():
-    app = AppPixivAPI()
-
+def refresh_pixiv(app):
     CACHEDIR.mkdir(parents=True, exist_ok=True)
 
     # get cached tokens
     with open(CACHEDIR / "token.json", "r+") as fp:
-        try:
+        cache = None
+        if app.access_token is None or app.refresh_token is None:
             cache = json.load(fp)
-            app.set_auth(access_token=cache["access_token"])
-        except JSONDecodeError:
-            cache = None
+            app.set_auth(cache["access_token"], cache["refresh_token"])
 
+        # TODO: fixup
         if cache is None or time() > cache["expiry"]:
-            resp = app.auth(refresh_token=cache["refresh_token"])
+            resp = app.auth(refresh_token=app.refresh_token)
+
+            app.expiry = int(time()) + resp["expires_in"]
 
             fp.seek(0, io.SEEK_SET)
-            fp.truncate()
+            fp.truncate(0)
 
             json.dump(
                 fp=fp,
                 obj=dict(
                     access_token=app.access_token,
                     refresh_token=app.refresh_token,
-                    expiry=int(time()) + resp["expires_in"],
+                    expiry=app.expiry,
                 ),
                 separators=(",", ":"),
             )
-
-    return app
 
 
 __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
@@ -74,7 +78,7 @@ __PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
 def main():
     args = create_parser().parse_args()
 
-    pixiv = init_pixiv()
+    pixiv = MyAppPixivAPI()
 
     server = create_app(pixiv)
 
@@ -98,6 +102,10 @@ def create_app(pixiv_app):
         language = request.args.get("lang")
         name = request.args.get("name")
         pixiv_app.set_accept_language(language)
+
+        if not pixiv_app.expiry or time() > pixiv_app.expiry:
+            # TODO: log
+            refresh_pixiv(pixiv_app)
 
         user_details = pixiv_app.user_detail(user_id)
 
