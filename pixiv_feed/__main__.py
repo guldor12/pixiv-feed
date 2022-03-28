@@ -11,7 +11,8 @@ from feedgen.feed import FeedGenerator
 __name__ = "pixiv-feed"
 
 APPDIRS = AppDirs(__name__)
-DATADIR = Path(APPDIRS.user_cache_dir)
+CACHEDIR = Path(APPDIRS.user_cache_dir)
+DATADIR = Path(APPDIRS.user_data_dir)
 
 
 def create_parser():
@@ -33,10 +34,10 @@ def create_parser():
 def init_pixiv():
     app = AppPixivAPI()
 
-    DATADIR.mkdir(parents=True, exist_ok=True)
+    CACHEDIR.mkdir(parents=True, exist_ok=True)
 
     # get cached tokens
-    with open(DATADIR / "token.json", "r+") as fp:
+    with open(CACHEDIR / "token.json", "r+") as fp:
         try:
             cache = json.load(fp)
             app.set_auth(access_token=cache["access_token"])
