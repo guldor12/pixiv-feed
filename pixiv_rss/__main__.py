@@ -70,28 +70,6 @@ __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
 __PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
 
 
-def create_feed(pixiv_app, user_id, language="en"):
-    user_details = pixiv_app.user_detail(user_id)
-
-    fg = FeedGenerator()
-    if language == "jp":
-        url_base = __PIXIV_USER_PATH_JP__
-    else:
-        url_base = __PIXIV_USER_PATH__
-    url = url_base.format(uid=user_id, language=language)
-
-    username = user_details['user']['name']
-    fg.id(url)
-    fg.title(f"{username} - Pixiv")
-    fg.description(f"{username} - Pixiv")
-    fg.author(name=username)
-    fg.link(href=url)
-    fg.logo("https://www.pixiv.net/favicon.ico")
-    fg.language(language)
-
-    return fg
-
-
 def main():
     args = create_parser().parse_args()
 
@@ -118,7 +96,24 @@ def create_app(pixiv_app):
         user_id = request.args["id"]
         language = request.args.get("lang")
         pixiv_app.set_accept_language(language)
-        feed = create_feed(pixiv_app, user_id, language)
+
+        user_details = pixiv_app.user_detail(user_id)
+
+        feed = FeedGenerator()
+        if language == "jp":
+            url_base = __PIXIV_USER_PATH_JP__
+        else:
+            url_base = __PIXIV_USER_PATH__
+        url = url_base.format(uid=user_id, language=language)
+
+        username = user_details['user']['name']
+        feed.id(url)
+        feed.title(f"{username} - Pixiv")
+        feed.description(f"{username} - Pixiv")
+        feed.author(name=username)
+        feed.link(href=url)
+        feed.logo("https://www.pixiv.net/favicon.ico")
+        feed.language(language)
 
         for illust in pixiv_app.user_illusts(user_id)["illusts"]:
             fe = feed.add_entry()
