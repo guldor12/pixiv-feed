@@ -1,7 +1,7 @@
-import sys, os, io, json, argparse
+import sys, os, io, json, html, argparse
 from time import time
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote as urlquote
 
 from appdirs import AppDirs
 from pixivpy3 import *
@@ -66,6 +66,8 @@ __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
 __PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
 __PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
 __PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
+__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}/artworks"
+__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}/artworks"
 
 
 def create_feed(pixiv_app, user_id, language="en"):
@@ -127,10 +129,27 @@ def create_app(pixiv_app):
                 url_base = __PIXIV_ARTWORK_PATH__
             url = url_base.format(uid=illust["id"], language=language)
 
+            body = ""
+            if illust["caption"]:
+                body += "{caption}<br/><br/>"
+            for tag in illust["tags"]:
+                if language == "jp":
+                    tag_url_base = __PIXIV_TAG_PATH_JP__
+                else:
+                    tag_url_base = __PIXIV_TAG_PATH__
+                tag_url = tag_url_base.format(urlquote(tag["name"]))
+
+                tag_body = f"#{tag['name']}"
+                if tag["translated_name"] is not None:
+                    tag_body += f" {tag['translated_name']}"
+                tag_body = html.escape(tag_body)
+                body += f"<a href={tag_url}>{tag_body}</a> "
+            body = body.format(**illust)
+
             fe.id(url)
             fe.title(illust["title"])
             fe.published(illust["create_date"])
-            fe.content(illust["caption"], type="html")
+            fe.content(body, type="html")
             fe.link(href=url)
 
         return feed
