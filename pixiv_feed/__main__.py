@@ -107,7 +107,7 @@ def create_app(pixiv_app):
             url_base = __PIXIV_USER_PATH__
         url = url_base.format(uid=user_id, language=language)
 
-        username = user_details['user']['name']
+        username = user_details["user"]["name"]
         title = f"{name or username} - Pixiv"
 
         feed.id(url)
