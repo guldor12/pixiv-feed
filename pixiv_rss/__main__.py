@@ -107,9 +107,11 @@ def create_app(pixiv_app):
         url = url_base.format(uid=user_id, language=language)
 
         username = user_details['user']['name']
+        title = f"{username} - Pixiv"
+
         feed.id(url)
-        feed.title(f"{username} - Pixiv")
-        feed.description(f"{username} - Pixiv")
+        feed.title(title)
+        feed.description(title)
         feed.author(name=username)
         feed.link(href=url)
         feed.logo("https://www.pixiv.net/favicon.ico")
