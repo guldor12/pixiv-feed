@@ -95,6 +95,7 @@ def create_app(pixiv_app):
     def get_feed():
         user_id = request.args["id"]
         language = request.args.get("lang")
+        name = request.args.get("name")
         pixiv_app.set_accept_language(language)
 
         user_details = pixiv_app.user_detail(user_id)
@@ -107,7 +108,7 @@ def create_app(pixiv_app):
         url = url_base.format(uid=user_id, language=language)
 
         username = user_details['user']['name']
-        title = f"{username} - Pixiv"
+        title = f"{name or username} - Pixiv"
 
         feed.id(url)
         feed.title(title)
