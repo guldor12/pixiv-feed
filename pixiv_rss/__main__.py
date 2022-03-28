@@ -66,8 +66,8 @@ __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
 __PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
 __PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
 __PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
-__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}/artworks"
-__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}/artworks"
+__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
+__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
 
 
 def create_feed(pixiv_app, user_id, language="en"):
