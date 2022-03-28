@@ -62,10 +62,10 @@ def init_pixiv():
     return app
 
 
-__PIXIV_USER_PATH_JP__ = "https://pixiv.net/users/{uid}"
-__PIXIV_ARTWORK_PATH_JP__ = "https://pixiv.net/artworks/{uid}"
-__PIXIV_USER_PATH__ = "https://pixiv.net/{language}/users/{uid}"
-__PIXIV_ARTWORK_PATH__ = "https://pixiv.net/{language}/artworks/{uid}"
+__PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
+__PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
+__PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
+__PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
 
 
 def create_feed(pixiv_app, user_id, language="en"):
