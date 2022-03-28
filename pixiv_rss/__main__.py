@@ -132,6 +132,7 @@ def create_app(pixiv_app):
             body = ""
             if illust["caption"]:
                 body += "{caption}<br/><br/>"
+            tags = []
             for tag in illust["tags"]:
                 if language == "jp":
                     tag_url_base = __PIXIV_TAG_PATH_JP__
@@ -143,7 +144,8 @@ def create_app(pixiv_app):
                 if tag["translated_name"] is not None:
                     tag_body += f" {tag['translated_name']}"
                 tag_body = html.escape(tag_body)
-                body += f"<a href={tag_url}>{tag_body}</a> "
+                tags.append(f"<a href={tag_url}>{tag_body}</a>")
+            body += " ".join(tags)
             body = body.format(**illust)
 
             fe.id(url)
