@@ -99,7 +99,7 @@ def create_app(pixiv_app):
     except OSError:
         pass
 
-    def get_feed():
+    def create_feed():
         user_id = request.args["id"]
         language = request.args.get("lang")
         name = request.args.get("name")
@@ -167,10 +167,10 @@ def create_app(pixiv_app):
 
     @app.route("/rss")
     def rss():
-        return get_feed().rss_str()
+        return create_feed().rss_str()
 
     @app.route("/atom")
     def atom():
-        return get_feed().atom_str()
+        return create_feed().atom_str()
 
     return app
