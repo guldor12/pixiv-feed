@@ -29,6 +29,27 @@ class MyAppPixivAPI(AppPixivAPI):
         self.expiry = None
         return super().__init__(*kargs, **kwargs)
 
+    def _format(self, str_l, str_j, uid, lang):
+        if lang is not None:
+            return str_l.format(language=lang, uid=uid)
+        else:
+            return str_j.format(uid)
+
+    def user_format(self, uid, lang=None):
+        l = self.__PIXIV_USER_PATH__
+        j = self.__PIXIV_USER_PATH_JP__
+        return self._format(l, j, uid, lang)
+
+    def illust_format(self, uid, lang=None):
+        l = self.__PIXIV_ARTWORK_PATH__
+        j = self.__PIXIV_ARTWORK_PATH_JP__
+        return self._format(l, j, uid, lang)
+
+    def tag_format(self, uid, lang=None):
+        l = self.__PIXIV_TAG_PATH__
+        j = self.__PIXIV_TAG_PATH_JP__
+        return self._format(l, j, uid, lang)
+
     def user_feedgen(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
 
@@ -44,11 +65,7 @@ class MyAppPixivAPI(AppPixivAPI):
         user_details = self.user_detail(user_id)
 
         fg = FeedGenerator()
-        if language == "jp":
-            url_base = self.__PIXIV_USER_PATH_JP__
-        else:
-            url_base = self.__PIXIV_USER_PATH__
-        url = url_base.format(uid=user_id, language=language)
+        url = self.user_format(user_id, language)
 
         username = user_details["user"]["name"]
         title = f"{name or username} - Pixiv"
@@ -64,22 +81,14 @@ class MyAppPixivAPI(AppPixivAPI):
         for illust in self.user_illusts(user_id)["illusts"]:
             fe = fg.add_entry()
 
-            if language == "jp":
-                url_base = self.__PIXIV_ARTWORK_PATH_JP__
-            else:
-                url_base = self.__PIXIV_ARTWORK_PATH__
-            url = url_base.format(uid=illust["id"], language=language)
+            url = self.illust_format(illust["id"], language)
 
             body = ""
             if illust["caption"]:
                 body += "{caption}<br/><br/>"
             tags = []
             for tag in illust["tags"]:
-                if language == "jp":
-                    tag_url_base = self.__PIXIV_TAG_PATH_JP__
-                else:
-                    tag_url_base = self.__PIXIV_TAG_PATH__
-                tag_url = tag_url_base.format(urlquote(tag["name"]))
+                tag_url = self.tag_format(urlquote(tag["name"]))
 
                 tag_body = f"#{tag['name']}"
                 if tag["translated_name"] is not None:
