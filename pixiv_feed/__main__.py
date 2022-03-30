@@ -15,36 +15,85 @@ CACHEDIR = Path(APPDIRS.user_cache_dir)
 DATADIR = Path(APPDIRS.user_data_dir)
 
 
-__PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
-__PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
-__PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
-__PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
-__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
-__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
-
-
 class MyAppPixivAPI(AppPixivAPI):
+    __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
+    __PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
+    __PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
+    __PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
+    __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
+    __PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
+
     def __init__(self, *kargs, **kwargs):
         self.expiry = None
         return super().__init__(*kargs, **kwargs)
 
+    def user_feedgen(self, **kwargs):
+        assert "id" in kwargs or "id_" in kwargs
 
-def create_parser():
-    parser = argparse.ArgumentParser()
-    addarg = parser.add_argument
+        user_id = kwargs.get("id", kwargs.get("id_"))
+        language = kwargs.get("lang")
+        name = kwargs.get("name")
+        self.set_accept_language(language)
 
-    # fmt: off
-    addarg("--rss", dest="feed_type", action="store_const", const="rss", default="rss",
-           help="Generate an RSS feed")
-    addarg("--atom", dest="feed_type", action="store_const", const="atom",
-           help="Generate an Atom feed")
-    addarg("--host", action="store",
-           help="Host to bind to")
-    addarg("-p", "--port", action="store", type=int,
-           help="Port to serve feeds on")
-    # fmt: on
+        if not self.expiry or time() > self.expiry:
+            # TODO: log
+            refresh_pixiv(self)
 
-    return parser
+        user_details = self.user_detail(user_id)
+
+        fg = FeedGenerator()
+        if language == "jp":
+            url_base = self.__PIXIV_USER_PATH_JP__
+        else:
+            url_base = self.__PIXIV_USER_PATH__
+        url = url_base.format(uid=user_id, language=language)
+
+        username = user_details["user"]["name"]
+        title = f"{name or username} - Pixiv"
+
+        fg.id(url)
+        fg.title(title)
+        fg.description(title)
+        fg.author(name=username)
+        fg.link(href=url)
+        fg.logo("https://www.pixiv.net/favicon.ico")
+        fg.language(language)
+
+        for illust in self.user_illusts(user_id)["illusts"]:
+            fe = fg.add_entry()
+
+            if language == "jp":
+                url_base = self.__PIXIV_ARTWORK_PATH_JP__
+            else:
+                url_base = self.__PIXIV_ARTWORK_PATH__
+            url = url_base.format(uid=illust["id"], language=language)
+
+            body = ""
+            if illust["caption"]:
+                body += "{caption}<br/><br/>"
+            tags = []
+            for tag in illust["tags"]:
+                if language == "jp":
+                    tag_url_base = self.__PIXIV_TAG_PATH_JP__
+                else:
+                    tag_url_base = self.__PIXIV_TAG_PATH__
+                tag_url = tag_url_base.format(urlquote(tag["name"]))
+
+                tag_body = f"#{tag['name']}"
+                if tag["translated_name"] is not None:
+                    tag_body += f" {tag['translated_name']}"
+                tag_body = html.escape(tag_body)
+                tags.append(f"<a href={tag_url}>{tag_body}</a>")
+            body += " ".join(tags)
+            body = body.format(**illust)
+
+            fe.id(url)
+            fe.title(illust["title"])
+            fe.published(illust["create_date"])
+            fe.content(body, type="html")
+            fe.link(href=url)
+
+        return fg
 
 
 def refresh_pixiv(app):
@@ -77,70 +126,6 @@ def refresh_pixiv(app):
             )
 
 
-def create_feed(pixiv_app):
-    pixiv_app.set_accept_language(language)
-
-    if not pixiv_app.expiry or time() > pixiv_app.expiry:
-        # TODO: log
-        refresh_pixiv(pixiv_app)
-
-    user_details = pixiv_app.user_detail(user_id)
-
-    fg = FeedGenerator()
-    if language == "jp":
-        url_base = __PIXIV_USER_PATH_JP__
-    else:
-        url_base = __PIXIV_USER_PATH__
-    url = url_base.format(uid=user_id, language=language)
-
-    username = user_details["user"]["name"]
-    title = f"{name or username} - Pixiv"
-
-    fg.id(url)
-    fg.title(title)
-    fg.description(title)
-    fg.author(name=username)
-    fg.link(href=url)
-    fg.logo("https://www.pixiv.net/favicon.ico")
-    fg.language(language)
-
-    for illust in pixiv_app.user_illusts(user_id)["illusts"]:
-        fe = fg.add_entry()
-
-        if language == "jp":
-            url_base = __PIXIV_ARTWORK_PATH_JP__
-        else:
-            url_base = __PIXIV_ARTWORK_PATH__
-        url = url_base.format(uid=illust["id"], language=language)
-
-        body = ""
-        if illust["caption"]:
-            body += "{caption}<br/><br/>"
-        tags = []
-        for tag in illust["tags"]:
-            if language == "jp":
-                tag_url_base = __PIXIV_TAG_PATH_JP__
-            else:
-                tag_url_base = __PIXIV_TAG_PATH__
-            tag_url = tag_url_base.format(urlquote(tag["name"]))
-
-            tag_body = f"#{tag['name']}"
-            if tag["translated_name"] is not None:
-                tag_body += f" {tag['translated_name']}"
-            tag_body = html.escape(tag_body)
-            tags.append(f"<a href={tag_url}>{tag_body}</a>")
-        body += " ".join(tags)
-        body = body.format(**illust)
-
-        fe.id(url)
-        fe.title(illust["title"])
-        fe.published(illust["create_date"])
-        fe.content(body, type="html")
-        fe.link(href=url)
-
-    return fg
-
-
 def flask_init():
     pixiv = MyAppPixivAPI()
 
@@ -154,11 +139,11 @@ def flask_init():
 
     @app.route("/rss")
     def rss():
-        return create_feed(pixiv, **request.args).rss_str()
+        return pixiv.user_feedgen(**request.args).rss_str()
 
     @app.route("/atom")
     def atom():
-        return create_feed(pixiv, **request.args).atom_str()
+        return pixiv.user_feedgen(**request.args).atom_str()
 
     return app
 
