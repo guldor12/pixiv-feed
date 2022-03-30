@@ -144,7 +144,9 @@ def create_feed():
     return fg
 
 
-def create_app(pixiv_app):
+def flask_init():
+    pixiv = MyAppPixivAPI()
+
     app = Flask(__name__, instance_path=DATADIR)
     app.config.from_mapping(
         SECRET_KEY="dev",
@@ -167,9 +169,7 @@ def create_app(pixiv_app):
 def main():
     args = create_parser().parse_args()
 
-    pixiv = MyAppPixivAPI()
-
-    server = create_app(pixiv)
+    server = flask_init()
 
     server.run(host=args.host, port=args.port)
 
