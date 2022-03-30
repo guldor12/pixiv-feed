@@ -50,6 +50,29 @@ class MyAppPixivAPI(AppPixivAPI):
         j = self.__PIXIV_TAG_PATH_JP__
         return self._format(l, j, uid, lang)
 
+    def tag_html(self, tag):
+        url = self.tag_format(html.escape(urlquote(tag["name"])))
+
+        tag_html = f"#{tag['name']}"
+        if tag["translated_name"] is not None:
+            tag_html += f" {tag['translated_name']}"
+        tag_html = html.escape(tag_html)
+        tag_html = f"<a href={url}>{tag_html}</a>"
+
+        return tag_html
+
+    def illust_html(self, illust):
+        body = ""
+        if illust["caption"]:
+            body += "{caption}<br/><br/>"
+        tags = []
+        for tag in illust["tags"]:
+            tags.append(self.tag_html(tag))
+        body += " ".join(tags)
+        body = body.format(**illust)
+
+        return body
+
     def user_feedgen(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
 
@@ -81,20 +104,7 @@ class MyAppPixivAPI(AppPixivAPI):
         for illust in self.user_illusts(user_id)["illusts"]:
             url = self.illust_format(illust["id"], language)
 
-            body = ""
-            if illust["caption"]:
-                body += "{caption}<br/><br/>"
-            tags = []
-            for tag in illust["tags"]:
-                tag_url = self.tag_format(html.escape(urlquote(tag["name"])))
-
-                tag_body = f"#{tag['name']}"
-                if tag["translated_name"] is not None:
-                    tag_body += f" {tag['translated_name']}"
-                tag_body = html.escape(tag_body)
-                tags.append(f"<a href={tag_url}>{tag_body}</a>")
-            body += " ".join(tags)
-            body = body.format(**illust)
+            body = self.illust_html(illust)
 
             fe = fg.add_entry()
 
