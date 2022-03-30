@@ -15,6 +15,14 @@ CACHEDIR = Path(APPDIRS.user_cache_dir)
 DATADIR = Path(APPDIRS.user_data_dir)
 
 
+__PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
+__PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
+__PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
+__PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
+__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
+__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
+
+
 class MyAppPixivAPI(AppPixivAPI):
     def __init__(self, *kargs, **kwargs):
         self.expiry = None
@@ -67,24 +75,6 @@ def refresh_pixiv(app):
                 ),
                 separators=(",", ":"),
             )
-
-
-__PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
-__PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
-__PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
-__PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
-__PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
-__PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
-
-
-def main():
-    args = create_parser().parse_args()
-
-    pixiv = MyAppPixivAPI()
-
-    server = create_app(pixiv)
-
-    server.run(host=args.host, port=args.port)
 
 
 def create_feed():
@@ -172,3 +162,15 @@ def create_app(pixiv_app):
         return create_feed().atom_str()
 
     return app
+
+
+def main():
+    args = create_parser().parse_args()
+
+    pixiv = MyAppPixivAPI()
+
+    server = create_app(pixiv)
+
+    server.run(host=args.host, port=args.port)
+
+    return 0
