@@ -109,7 +109,7 @@ def create_app(pixiv_app):
 
         user_details = pixiv_app.user_detail(user_id)
 
-        feed = FeedGenerator()
+        fg = FeedGenerator()
         if language == "jp":
             url_base = __PIXIV_USER_PATH_JP__
         else:
@@ -119,16 +119,16 @@ def create_app(pixiv_app):
         username = user_details["user"]["name"]
         title = f"{name or username} - Pixiv"
 
-        feed.id(url)
-        feed.title(title)
-        feed.description(title)
-        feed.author(name=username)
-        feed.link(href=url)
-        feed.logo("https://www.pixiv.net/favicon.ico")
-        feed.language(language)
+        fg.id(url)
+        fg.title(title)
+        fg.description(title)
+        fg.author(name=username)
+        fg.link(href=url)
+        fg.logo("https://www.pixiv.net/favicon.ico")
+        fg.language(language)
 
         for illust in pixiv_app.user_illusts(user_id)["illusts"]:
-            fe = feed.add_entry()
+            fe = fg.add_entry()
 
             if language == "jp":
                 url_base = __PIXIV_ARTWORK_PATH_JP__
@@ -161,7 +161,7 @@ def create_app(pixiv_app):
             fe.content(body, type="html")
             fe.link(href=url)
 
-        return feed
+        return fg
 
     @app.route("/rss")
     def rss():
