@@ -51,7 +51,8 @@ class MyAppPixivAPI(AppPixivAPI):
         return self._format(l, j, uid, lang)
 
     def tag_html(self, tag):
-        url = self.tag_format(html.escape(urlquote(tag["name"])))
+        url = self.tag_format(urlquote(tag["name"]))
+        url = html.escape(url)
 
         tag_html = f"#{tag['name']}"
         if tag["translated_name"] is not None:
