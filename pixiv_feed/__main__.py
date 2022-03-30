@@ -77,10 +77,7 @@ def refresh_pixiv(app):
             )
 
 
-def create_feed():
-    user_id = request.args["id"]
-    language = request.args.get("lang")
-    name = request.args.get("name")
+def create_feed(pixiv_app):
     pixiv_app.set_accept_language(language)
 
     if not pixiv_app.expiry or time() > pixiv_app.expiry:
@@ -157,11 +154,11 @@ def flask_init():
 
     @app.route("/rss")
     def rss():
-        return create_feed().rss_str()
+        return create_feed(pixiv, **request.args).rss_str()
 
     @app.route("/atom")
     def atom():
-        return create_feed().atom_str()
+        return create_feed(pixiv, **request.args).atom_str()
 
     return app
 
