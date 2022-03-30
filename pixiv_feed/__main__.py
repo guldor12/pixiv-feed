@@ -29,6 +29,35 @@ class MyAppPixivAPI(AppPixivAPI):
         self.expiry = None
         return super().__init__(*kargs, **kwargs)
 
+    def refresh(self):
+        CACHEDIR.mkdir(parents=True, exist_ok=True)
+
+        # get cached tokens
+        with open(CACHEDIR / "token.json", "r+") as fp:
+            cache = None
+            if self.access_token is None or self.refresh_token is None:
+                cache = json.load(fp)
+                self.set_auth(cache["access_token"], cache["refresh_token"])
+
+            # TODO: fixup
+            if cache is None or time() > cache["expiry"]:
+                resp = self.auth(refresh_token=self.refresh_token)
+
+                self.expiry = int(time()) + resp["expires_in"]
+
+                fp.seek(0, io.SEEK_SET)
+                fp.truncate(0)
+
+                json.dump(
+                    fp=fp,
+                    obj=dict(
+                        access_token=self.access_token,
+                        refresh_token=self.refresh_token,
+                        expiry=self.expiry,
+                    ),
+                    separators=(",", ":"),
+                )
+
     def _format(self, str_l, str_j, uid, lang):
         if lang is not None:
             return str_l.format(language=lang, uid=uid)
@@ -84,7 +113,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
         if not self.expiry or time() > self.expiry:
             # TODO: log
-            refresh_pixiv(self)
+            self.refresh()
 
         user_details = self.user_detail(user_id)
 
@@ -116,36 +145,6 @@ class MyAppPixivAPI(AppPixivAPI):
             fe.link(href=url)
 
         return fg
-
-
-def refresh_pixiv(app):
-    CACHEDIR.mkdir(parents=True, exist_ok=True)
-
-    # get cached tokens
-    with open(CACHEDIR / "token.json", "r+") as fp:
-        cache = None
-        if app.access_token is None or app.refresh_token is None:
-            cache = json.load(fp)
-            app.set_auth(cache["access_token"], cache["refresh_token"])
-
-        # TODO: fixup
-        if cache is None or time() > cache["expiry"]:
-            resp = app.auth(refresh_token=app.refresh_token)
-
-            app.expiry = int(time()) + resp["expires_in"]
-
-            fp.seek(0, io.SEEK_SET)
-            fp.truncate(0)
-
-            json.dump(
-                fp=fp,
-                obj=dict(
-                    access_token=app.access_token,
-                    refresh_token=app.refresh_token,
-                    expiry=app.expiry,
-                ),
-                separators=(",", ":"),
-            )
 
 
 def flask_init():
