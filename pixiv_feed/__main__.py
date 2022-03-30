@@ -174,3 +174,7 @@ def main():
     server.run(host=args.host, port=args.port)
 
     return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
