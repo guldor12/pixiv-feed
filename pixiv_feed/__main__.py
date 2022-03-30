@@ -1,4 +1,4 @@
-import sys, io, json, html, argparse
+import sys, io, json, html
 from time import time
 from pathlib import Path
 from urllib.parse import urlparse, quote as urlquote
@@ -7,6 +7,8 @@ from appdirs import AppDirs
 from pixivpy3 import *
 from flask import Flask, request
 from feedgen.feed import FeedGenerator
+
+from . import option
 
 NAME = "pixiv-feed"
 
@@ -149,7 +151,7 @@ def flask_init():
 
 
 def main():
-    args = create_parser().parse_args()
+    args = option.create_parser().parse_args()
 
     server = flask_init()
 
