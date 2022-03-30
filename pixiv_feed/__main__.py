@@ -79,8 +79,6 @@ class MyAppPixivAPI(AppPixivAPI):
         fg.language(language)
 
         for illust in self.user_illusts(user_id)["illusts"]:
-            fe = fg.add_entry()
-
             url = self.illust_format(illust["id"], language)
 
             body = ""
@@ -88,7 +86,7 @@ class MyAppPixivAPI(AppPixivAPI):
                 body += "{caption}<br/><br/>"
             tags = []
             for tag in illust["tags"]:
-                tag_url = self.tag_format(urlquote(tag["name"]))
+                tag_url = self.tag_format(html.escape(urlquote(tag["name"])))
 
                 tag_body = f"#{tag['name']}"
                 if tag["translated_name"] is not None:
@@ -97,6 +95,8 @@ class MyAppPixivAPI(AppPixivAPI):
                 tags.append(f"<a href={tag_url}>{tag_body}</a>")
             body += " ".join(tags)
             body = body.format(**illust)
+
+            fe = fg.add_entry()
 
             fe.id(url)
             fe.title(illust["title"])
