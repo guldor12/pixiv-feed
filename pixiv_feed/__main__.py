@@ -30,6 +30,8 @@ def create_parser():
            help="Generate an RSS feed")
     addarg("--atom", dest="feed_type", action="store_const", const="atom",
            help="Generate an Atom feed")
+    addarg("--host", action="store",
+           help="Host to bind to")
     addarg("-p", "--port", action="store", type=int,
            help="Port to serve feeds on")
     # fmt: on
@@ -82,7 +84,7 @@ def main():
 
     server = create_app(pixiv)
 
-    server.run(port=args.port)
+    server.run(host=args.host, port=args.port)
 
 
 def create_app(pixiv_app):
