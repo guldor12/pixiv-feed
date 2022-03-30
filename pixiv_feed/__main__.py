@@ -1,4 +1,4 @@
-import sys, os, io, json, html, argparse
+import sys, io, json, html, argparse
 from time import time
 from pathlib import Path
 from urllib.parse import urlparse, quote as urlquote
@@ -161,10 +161,7 @@ def create_app(pixiv_app):
         DATABASE=Path(app.instance_path) / "cache.sqlite",
     )
 
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
+    Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
     @app.route("/rss")
     def rss():
