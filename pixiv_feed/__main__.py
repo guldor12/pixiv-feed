@@ -87,6 +87,73 @@ def main():
     server.run(host=args.host, port=args.port)
 
 
+def create_feed():
+    user_id = request.args["id"]
+    language = request.args.get("lang")
+    name = request.args.get("name")
+    pixiv_app.set_accept_language(language)
+
+    if not pixiv_app.expiry or time() > pixiv_app.expiry:
+        # TODO: log
+        refresh_pixiv(pixiv_app)
+
+    user_details = pixiv_app.user_detail(user_id)
+
+    fg = FeedGenerator()
+    if language == "jp":
+        url_base = __PIXIV_USER_PATH_JP__
+    else:
+        url_base = __PIXIV_USER_PATH__
+    url = url_base.format(uid=user_id, language=language)
+
+    username = user_details["user"]["name"]
+    title = f"{name or username} - Pixiv"
+
+    fg.id(url)
+    fg.title(title)
+    fg.description(title)
+    fg.author(name=username)
+    fg.link(href=url)
+    fg.logo("https://www.pixiv.net/favicon.ico")
+    fg.language(language)
+
+    for illust in pixiv_app.user_illusts(user_id)["illusts"]:
+        fe = fg.add_entry()
+
+        if language == "jp":
+            url_base = __PIXIV_ARTWORK_PATH_JP__
+        else:
+            url_base = __PIXIV_ARTWORK_PATH__
+        url = url_base.format(uid=illust["id"], language=language)
+
+        body = ""
+        if illust["caption"]:
+            body += "{caption}<br/><br/>"
+        tags = []
+        for tag in illust["tags"]:
+            if language == "jp":
+                tag_url_base = __PIXIV_TAG_PATH_JP__
+            else:
+                tag_url_base = __PIXIV_TAG_PATH__
+            tag_url = tag_url_base.format(urlquote(tag["name"]))
+
+            tag_body = f"#{tag['name']}"
+            if tag["translated_name"] is not None:
+                tag_body += f" {tag['translated_name']}"
+            tag_body = html.escape(tag_body)
+            tags.append(f"<a href={tag_url}>{tag_body}</a>")
+        body += " ".join(tags)
+        body = body.format(**illust)
+
+        fe.id(url)
+        fe.title(illust["title"])
+        fe.published(illust["create_date"])
+        fe.content(body, type="html")
+        fe.link(href=url)
+
+    return fg
+
+
 def create_app(pixiv_app):
     app = Flask(__name__, instance_path=DATADIR)
     app.config.from_mapping(
@@ -98,72 +165,6 @@ def create_app(pixiv_app):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-
-    def create_feed():
-        user_id = request.args["id"]
-        language = request.args.get("lang")
-        name = request.args.get("name")
-        pixiv_app.set_accept_language(language)
-
-        if not pixiv_app.expiry or time() > pixiv_app.expiry:
-            # TODO: log
-            refresh_pixiv(pixiv_app)
-
-        user_details = pixiv_app.user_detail(user_id)
-
-        fg = FeedGenerator()
-        if language == "jp":
-            url_base = __PIXIV_USER_PATH_JP__
-        else:
-            url_base = __PIXIV_USER_PATH__
-        url = url_base.format(uid=user_id, language=language)
-
-        username = user_details["user"]["name"]
-        title = f"{name or username} - Pixiv"
-
-        fg.id(url)
-        fg.title(title)
-        fg.description(title)
-        fg.author(name=username)
-        fg.link(href=url)
-        fg.logo("https://www.pixiv.net/favicon.ico")
-        fg.language(language)
-
-        for illust in pixiv_app.user_illusts(user_id)["illusts"]:
-            fe = fg.add_entry()
-
-            if language == "jp":
-                url_base = __PIXIV_ARTWORK_PATH_JP__
-            else:
-                url_base = __PIXIV_ARTWORK_PATH__
-            url = url_base.format(uid=illust["id"], language=language)
-
-            body = ""
-            if illust["caption"]:
-                body += "{caption}<br/><br/>"
-            tags = []
-            for tag in illust["tags"]:
-                if language == "jp":
-                    tag_url_base = __PIXIV_TAG_PATH_JP__
-                else:
-                    tag_url_base = __PIXIV_TAG_PATH__
-                tag_url = tag_url_base.format(urlquote(tag["name"]))
-
-                tag_body = f"#{tag['name']}"
-                if tag["translated_name"] is not None:
-                    tag_body += f" {tag['translated_name']}"
-                tag_body = html.escape(tag_body)
-                tags.append(f"<a href={tag_url}>{tag_body}</a>")
-            body += " ".join(tags)
-            body = body.format(**illust)
-
-            fe.id(url)
-            fe.title(illust["title"])
-            fe.published(illust["create_date"])
-            fe.content(body, type="html")
-            fe.link(href=url)
-
-        return fg
 
     @app.route("/rss")
     def rss():
