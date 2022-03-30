@@ -8,9 +8,9 @@ from pixivpy3 import *
 from flask import Flask, request
 from feedgen.feed import FeedGenerator
 
-__name__ = "pixiv-feed"
+NAME = "pixiv-feed"
 
-APPDIRS = AppDirs(__name__)
+APPDIRS = AppDirs(NAME)
 CACHEDIR = Path(APPDIRS.user_cache_dir)
 DATADIR = Path(APPDIRS.user_data_dir)
 
