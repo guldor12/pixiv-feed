@@ -6,7 +6,7 @@ from urllib.parse import urlparse, quote as urlquote
 import click
 from appdirs import AppDirs
 from pixivpy3 import *
-from flask import Flask, request
+from flask import Flask, request, abort
 from feedgen.feed import FeedGenerator
 
 NAME = "pixiv-feed"
@@ -214,20 +214,22 @@ def flask_init():
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
-    @app.route("/illust/rss")
-    def illust_rss():
-        return pixiv.user_illusts_feed(**request.args).rss_str()
+    def select_feed(fg, feed_type):
+        if feed_type == "rss":
+            return fg.rss_str()
+        elif feed_type == "atom":
+            return fg.atom_str()
+        else:
+            abort(404)
 
-    @app.route("/illust/atom")
-    def illust_atom():
-        return pixiv.user_illusts_feed(**request.args).atom_str()
+    @app.route("/illust/<feed_type>")
+    def illust(feed_type):
+        fg = pixiv.user_illusts_feed(**request.args)
+        return select_feed(fg, feed_type)
 
-    @app.route("/new_illust/rss")
-    def new_illust_rss():
-        return pixiv.new_illusts_feed(**request.args).rss_str()
-
-    @app.route("/new_illust/atom")
-    def new_illust_atom():
-        return pixiv.new_illusts_feed(**request.args).atom_str()
+    @app.route("/new_illust/<feed_type>")
+    def new_illust(feed_type):
+        fg = pixiv.new_illusts_feed(**request.args)
+        return select_feed(fg, feed_type)
 
     return app
