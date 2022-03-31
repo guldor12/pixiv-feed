@@ -3,7 +3,7 @@ import click
 from . import flask_init
 
 
-@click.command(add_help_option=False, help="Generate RSS/Atom feeds for Pixiv users")
+@click.command(add_help_option=False, help="Generate and serve RSS/Atom feeds for Pixiv users")
 @click.help_option("-h", "--help")
 @click.option("--host", default="localhost", help="Host to bind to")
 @click.option("-p", "--port", type=int, help="Port to serve feeds on")
