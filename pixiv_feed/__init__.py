@@ -102,7 +102,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
         return body
 
-    def user_feedgen(self, **kwargs):
+    def user_illusts_feed(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
 
         user_id = kwargs.get("id", kwargs.get("id_"))
@@ -157,12 +157,12 @@ def flask_init():
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
-    @app.route("/rss")
-    def rss():
-        return pixiv.user_feedgen(**request.args).rss_str()
+    @app.route("/illusts/rss")
+    def illusts_rss():
+        return pixiv.user_illusts_feed(**request.args).rss_str()
 
-    @app.route("/atom")
-    def atom():
-        return pixiv.user_feedgen(**request.args).atom_str()
+    @app.route("/illusts/atom")
+    def illusts_atom():
+        return pixiv.user_illusts_feed(**request.args).atom_str()
 
     return app
