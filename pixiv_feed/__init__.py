@@ -29,7 +29,7 @@ class MyAppPixivAPI(AppPixivAPI):
     __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
     __PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
     __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
-    __PIXIV_TAG_PATH__ = "https://www.pixiv.net/en/tags/{}"
+    __PIXIV_TAG_PATH__ = "https://www.pixiv.net/{language}/tags/{}"
 
     def __init__(self, *kargs, **kwargs):
         self.expiry = None
