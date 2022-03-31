@@ -16,6 +16,13 @@ CACHEDIR = Path(APPDIRS.user_cache_dir)
 DATADIR = Path(APPDIRS.user_data_dir)
 
 
+class UserNotFound(Exception):
+    def __init__(self, uid):
+        self.uid = uid
+        self.message = f"User not found: {uid}"
+        super().__init__(self.message)
+
+
 class MyAppPixivAPI(AppPixivAPI):
     __PIXIV_ARTWORK_PATH_JP__ = "https://www.pixiv.net/artworks/{uid}"
     __PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
@@ -115,6 +122,9 @@ class MyAppPixivAPI(AppPixivAPI):
             self.refresh()
 
         user_details = self.user_detail(user_id)
+
+        if "user" not in user_details:
+            raise UserNotFound(user_id)
 
         fg = FeedGenerator()
         url = self.user_format(user_id, language)
