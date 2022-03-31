@@ -31,6 +31,8 @@ class MyAppPixivAPI(AppPixivAPI):
     __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
     __PIXIV_TAG_PATH__ = "https://www.pixiv.net/{language}/tags/{}"
 
+    __PIXIV_NEW_ILLUST_PATH__ = "https://www.pixiv.net/bookmark_new_illust.php"
+
     def __init__(self, *kargs, **kwargs):
         self.expiry = None
         return super().__init__(*kargs, **kwargs)
@@ -157,6 +159,49 @@ class MyAppPixivAPI(AppPixivAPI):
 
         return fg
 
+    def new_illusts_feed(self, **kwargs):
+        language = kwargs.get("lang")
+        self.set_accept_language(language)
+
+        if not self.expiry or time() > self.expiry:
+            # TODO: log
+            self.refresh()
+
+        user_details = self.user_detail(self.user_id)
+
+        if "user" not in user_details:
+            breakpoint()
+            raise UserNotFound(self.user_id)
+
+        fg = FeedGenerator()
+        url = self.__PIXIV_NEW_ILLUST_PATH__
+
+        username = user_details["user"]["name"]
+        title = "Works by users you're following - Pixiv"
+
+        fg.id(url)
+        fg.title(title)
+        fg.description(title)
+        fg.author(name=username)
+        fg.link(href=url)
+        fg.logo("https://www.pixiv.net/favicon.ico")
+        fg.language(language)
+
+        for illust in self.illust_follow()["illusts"]:
+            url = self.illust_format(illust["id"], language)
+
+            body = self.illust_html(illust)
+
+            fe = fg.add_entry()
+
+            fe.id(url)
+            fe.title(illust["title"])
+            fe.published(illust["create_date"])
+            fe.content(body, type="html")
+            fe.link(href=url)
+
+        return fg
+
 
 def flask_init():
     pixiv = MyAppPixivAPI()
@@ -176,5 +221,13 @@ def flask_init():
     @app.route("/illust/atom")
     def illust_atom():
         return pixiv.user_illusts_feed(**request.args).atom_str()
+
+    @app.route("/new_illust/rss")
+    def new_illust_rss():
+        return pixiv.new_illusts_feed(**request.args).rss_str()
+
+    @app.route("/new_illust/atom")
+    def new_illust_atom():
+        return pixiv.new_illusts_feed(**request.args).atom_str()
 
     return app
