@@ -169,12 +169,12 @@ def flask_init():
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
-    @app.route("/illusts/rss")
-    def illusts_rss():
+    @app.route("/illust/rss")
+    def illust_rss():
         return pixiv.user_illusts_feed(**request.args).rss_str()
 
-    @app.route("/illusts/atom")
-    def illusts_atom():
+    @app.route("/illust/atom")
+    def illust_atom():
         return pixiv.user_illusts_feed(**request.args).atom_str()
 
     return app
