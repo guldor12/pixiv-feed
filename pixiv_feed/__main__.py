@@ -3,12 +3,11 @@ from time import time
 from pathlib import Path
 from urllib.parse import urlparse, quote as urlquote
 
+import click
 from appdirs import AppDirs
 from pixivpy3 import *
 from flask import Flask, request
 from feedgen.feed import FeedGenerator
-
-from . import option
 
 NAME = "pixiv-feed"
 
@@ -169,12 +168,13 @@ def flask_init():
     return app
 
 
-def main():
-    args = option.create_parser().parse_args()
-
+@click.command(add_help_option=False)
+@click.help_option("-h", "--help")
+@click.option("--host", default="localhost", help="Host to bind to")
+@click.option("-p", "--port", type=int, help="Port to serve feeds on")
+def main(host, port):
     server = flask_init()
-
-    server.run(host=args.host, port=args.port)
+    server.run(host=host, port=port)
 
     return 0
 
