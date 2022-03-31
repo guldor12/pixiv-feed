@@ -149,7 +149,7 @@ class MyAppPixivAPI(AppPixivAPI):
 def flask_init():
     pixiv = MyAppPixivAPI()
 
-    app = Flask(__name__, instance_path=DATADIR)
+    app = Flask(NAME, instance_path=DATADIR)
     app.config.from_mapping(
         SECRET_KEY="dev",
         DATABASE=Path(app.instance_path) / "cache.sqlite",
