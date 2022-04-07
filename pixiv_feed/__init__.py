@@ -69,10 +69,10 @@ class MyAppPixivAPI(AppPixivAPI):
                 )
 
     def _format(self, str_l, str_j, uid, lang):
-        if lang is not None:
+        if lang is not None and lang != "jp":
             return str_l.format(language=lang, uid=uid)
         else:
-            return str_j.format(uid)
+            return str_j.format(uid=uid)
 
     def user_format(self, uid, lang=None):
         l = self.__PIXIV_USER_PATH__
@@ -117,7 +117,7 @@ class MyAppPixivAPI(AppPixivAPI):
         assert "id" in kwargs or "id_" in kwargs
 
         user_id = kwargs.get("id", kwargs.get("id_"))
-        language = kwargs.get("lang")
+        language = kwargs.get("lang", "jp")
         name = kwargs.get("name")
         self.set_accept_language(language)
 
@@ -160,7 +160,7 @@ class MyAppPixivAPI(AppPixivAPI):
         return fg
 
     def new_illusts_feed(self, **kwargs):
-        language = kwargs.get("lang")
+        language = kwargs.get("lang", "jp")
         self.set_accept_language(language)
 
         if not self.expiry or time() > self.expiry:
