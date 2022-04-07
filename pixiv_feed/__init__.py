@@ -153,7 +153,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
             fe.id(url)
             fe.title(illust["title"])
-            fe.author(f"{illust['user']['name']} ({illust['user']['account']})")
+            fe.author(name=f"{illust['user']['name']} ({illust['user']['account']})")
             fe.published(illust["create_date"])
             fe.content(body, type="html")
             fe.link(href=url)
@@ -171,7 +171,6 @@ class MyAppPixivAPI(AppPixivAPI):
         user_details = self.user_detail(self.user_id)
 
         if "user" not in user_details:
-            breakpoint()
             raise UserNotFound(self.user_id)
 
         fg = FeedGenerator()
@@ -197,7 +196,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
             fe.id(url)
             fe.title(illust["title"])
-            fe.author(f"{illust['user']['name']} ({illust['user']['account']})")
+            fe.author(name=f"{illust['user']['name']} ({illust['user']['account']})")
             fe.published(illust["create_date"])
             fe.content(body, type="html")
             fe.link(href=url)
