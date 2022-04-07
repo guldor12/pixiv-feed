@@ -28,8 +28,8 @@ class MyAppPixivAPI(AppPixivAPI):
     __PIXIV_ARTWORK_PATH__ = "https://www.pixiv.net/{language}/artworks/{uid}"
     __PIXIV_USER_PATH_JP__ = "https://www.pixiv.net/users/{uid}"
     __PIXIV_USER_PATH__ = "https://www.pixiv.net/{language}/users/{uid}"
-    __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{}"
-    __PIXIV_TAG_PATH__ = "https://www.pixiv.net/{language}/tags/{}"
+    __PIXIV_TAG_PATH_JP__ = "https://www.pixiv.net/tags/{uid}"
+    __PIXIV_TAG_PATH__ = "https://www.pixiv.net/{language}/tags/{uid}"
 
     __PIXIV_NEW_ILLUST_PATH__ = "https://www.pixiv.net/bookmark_new_illust.php"
 
