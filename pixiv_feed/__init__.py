@@ -153,6 +153,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
             fe.id(url)
             fe.title(illust["title"])
+            fe.author(f"{illust['user']['name']} ({illust['user']['account']})")
             fe.published(illust["create_date"])
             fe.content(body, type="html")
             fe.link(href=url)
@@ -196,6 +197,7 @@ class MyAppPixivAPI(AppPixivAPI):
 
             fe.id(url)
             fe.title(illust["title"])
+            fe.author(f"{illust['user']['name']} ({illust['user']['account']})")
             fe.published(illust["create_date"])
             fe.content(body, type="html")
             fe.link(href=url)
