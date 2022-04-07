@@ -134,13 +134,13 @@ class MyAppPixivAPI(AppPixivAPI):
         url = self.user_format(user_id, language)
 
         username = user_details["user"]["name"]
-        title = f"{name or username} - Pixiv"
+        title = f"Pixiv - {name or username}"
 
         fg.id(url)
         fg.title(title)
         fg.description(title)
         fg.author(name=username)
-        fg.link(href=url)
+        fg.link(href=url, rel="alternate")
         fg.logo("https://www.pixiv.net/favicon.ico")
         fg.language(language)
 
@@ -177,13 +177,13 @@ class MyAppPixivAPI(AppPixivAPI):
         url = self.__PIXIV_NEW_ILLUST_PATH__
 
         username = user_details["user"]["name"]
-        title = "Works by users you're following - Pixiv"
+        title = f"Pixiv - Works by users you're following - {username}"
 
         fg.id(url)
         fg.title(title)
         fg.description(title)
         fg.author(name=username)
-        fg.link(href=url)
+        fg.link(href=url, rel="alternate")
         fg.logo("https://www.pixiv.net/favicon.ico")
         fg.language(language)
 
