@@ -3,7 +3,6 @@ from time import time
 from pathlib import Path
 from urllib.parse import urlparse, quote as urlquote
 
-import click
 from appdirs import AppDirs
 from pixivpy3 import *
 from flask import Flask, request, abort
@@ -204,6 +203,16 @@ class MyAppPixivAPI(AppPixivAPI):
         return fg
 
 
+def select_feed(fg, feed_type):
+    if feed_type == "rss":
+        return fg.rss_str()
+    elif feed_type == "atom":
+        return fg.atom_str()
+    else:
+        raise ValueError
+
+
+
 def flask_init():
     pixiv = MyAppPixivAPI()
 
@@ -215,22 +224,20 @@ def flask_init():
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
-    def select_feed(fg, feed_type):
-        if feed_type == "rss":
-            return fg.rss_str()
-        elif feed_type == "atom":
-            return fg.atom_str()
-        else:
+    def wrapper(func, *kargs, **kwargs):
+        try:
+            return func(*kargs, **kwargs)
+        except ValueError:
             abort(404)
 
     @app.route("/illust/<feed_type>")
     def illust(feed_type):
         fg = pixiv.user_illusts_feed(**request.args)
-        return select_feed(fg, feed_type)
+        return wrapper(select_feed, fg, feed_type)
 
     @app.route("/new_illust/<feed_type>")
     def new_illust(feed_type):
         fg = pixiv.new_illusts_feed(**request.args)
-        return select_feed(fg, feed_type)
+        return wrapper(select_feed, fg, feed_type)
 
     return app
