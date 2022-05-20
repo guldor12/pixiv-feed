@@ -67,7 +67,8 @@ class MyAppPixivAPI(AppPixivAPI):
                     separators=(",", ":"),
                 )
 
-    def _format(self, str_l, str_j, uid, lang):
+    @staticmethod
+    def _format(str_l, str_j, uid, lang):
         if lang is not None and lang != "jp":
             return str_l.format(language=lang, uid=uid)
         else:
