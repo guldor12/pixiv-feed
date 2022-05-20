@@ -8,6 +8,12 @@ from pixivpy3 import *
 from flask import Flask, request, abort
 from feedgen.feed import FeedGenerator
 
+__all__ = [
+    "MyAppPixivAPI",
+    "flask_init",
+]
+
+
 NAME = "pixiv-feed"
 
 APPDIRS = AppDirs(NAME)
