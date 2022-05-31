@@ -1,7 +1,7 @@
 import sys, io, json, html
 from time import time
 from pathlib import Path
-from urllib.parse import urlparse, quote as urlquote
+from urllib.parse import urlsplit, quote as urlquote
 
 from appdirs import AppDirs
 from pixivpy3 import *
@@ -109,6 +109,16 @@ class MyAppPixivAPI(AppPixivAPI):
 
     def illust_html(self, illust):
         body = []
+
+        if illust["meta_pages"]:
+            original_images = [page["image_urls"]["original"] for page in illust["meta_pages"]]
+        else:
+            original_images = [illust["meta_single_page"]["original_image_url"]]
+
+        for img in original_images:
+            url = urlsplit(img)._replace(netloc="i.pixiv.cat").geturl()
+            body.append(f'<p><img src="{url}"/></p>')
+
         if illust["caption"]:
             body.append("{caption}<br/><br/>")
         tags = []
