@@ -108,16 +108,14 @@ class MyAppPixivAPI(AppPixivAPI):
         return tag_html
 
     def illust_html(self, illust):
-        body = ""
+        body = []
         if illust["caption"]:
-            body += "{caption}<br/><br/>"
+            body.append("{caption}<br/><br/>")
         tags = []
         for tag in illust["tags"]:
             tags.append(self.tag_html(tag))
-        body += " ".join(tags)
-        body = body.format(**illust)
-
-        return body
+        body.append(" ".join(tags))
+        return "".join(body).format(**illust)
 
     def user_illusts_feed(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
