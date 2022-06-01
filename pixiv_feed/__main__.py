@@ -1,6 +1,7 @@
 import sys
 import click
-from . import *
+from . import MyAppPixivAPI, select_feed
+from .flask import app
 
 
 @click.group(add_help_option=False)
@@ -45,8 +46,7 @@ def generate(feedtype, endpoint, language):
 @click.option("--host", default="localhost", help="Host to bind to")
 @click.option("-p", "--port", type=int, help="Port to serve feeds on")
 def server(host, port):
-    flask = flask_init()
-    flask.run(host=host, port=port)
+    app.run(host=host, port=port)
 
     return 0
 
