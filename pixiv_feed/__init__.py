@@ -115,14 +115,21 @@ class MyAppPixivAPI(AppPixivAPI):
 
         for img in original_images:
             url = urlsplit(img)._replace(netloc="i.pixiv.cat").geturl()
-            body.append(f'<p><img src="{url}"/></p>')
+            body.append(f'<div><img src="{url}"/></div>')
 
         if illust["caption"]:
-            body.append("{caption}<br/><br/>")
+            body.append(f'<div>{illust["caption"]}</div>')
         tags = []
         for tag in illust["tags"]:
             tags.append(self.tag_html(tag))
-        body.append(" ".join(tags))
+        if tags:
+            body.extend(
+                (
+                    '<div>',
+                    " ".join(tags),
+                    "</div>",
+                )
+            )
         return "".join(body).format(**illust)
 
     def user_illusts_feed(self, **kwargs):
