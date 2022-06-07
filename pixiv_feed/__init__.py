@@ -130,7 +130,7 @@ class MyAppPixivAPI(AppPixivAPI):
                     "</div>",
                 )
             )
-        return "".join(body).format(**illust)
+        return "".join(body)
 
     def user_illusts_feed(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
