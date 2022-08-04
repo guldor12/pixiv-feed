@@ -113,9 +113,12 @@ class MyAppPixivAPI(AppPixivAPI):
         else:
             original_images = [illust["meta_single_page"]["original_image_url"]]
 
-        for img in original_images:
-            url = urlsplit(img)._replace(netloc="i.pixiv.cat").geturl()
-            body.append(f'<div><img src="{url}"/></div>')
+        if original_images:
+            body.append("<div>")
+            for img in original_images:
+                url = urlsplit(img)._replace(netloc="i.pixiv.cat").geturl()
+                body.append(f'<div><img src="{url}"/></div>')
+            body.append("</div>")
 
         if illust["caption"]:
             body.append(f'<div>{illust["caption"]}</div>')
