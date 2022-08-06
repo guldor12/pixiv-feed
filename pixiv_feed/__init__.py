@@ -50,9 +50,9 @@ class MyAppPixivAPI(AppPixivAPI):
                 cache = json.load(fp)
                 self.set_auth(cache["access_token"], cache["refresh_token"])
                 self.user_id = cache["user_id"]
+                self.expiry = cache.get("expiry", None)
 
-            # TODO: fixup
-            if cache is None or time() > cache["expiry"]:
+            if cache is None or self.expiry is None or time() > self.expiry:
                 resp = self.auth(refresh_token=self.refresh_token)
 
                 self.expiry = int(time()) + resp["expires_in"]
