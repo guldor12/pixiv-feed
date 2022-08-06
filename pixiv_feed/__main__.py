@@ -20,7 +20,8 @@ def select_feed(fg, feed_type):
 
 
 # fmt: off
-@cli.command(add_help_option=False, help="Generate and serve RSS/Atom feeds for Pixiv users")
+@cli.command(add_help_option=False, help="Generate and serve RSS/Atom feeds for Pixiv users",
+             no_args_is_help=True)
 @click.help_option("-h", "--help")
 @click.option("-l", "--language", help="Language to serve feeds in")
 @click.option("-r", "--rss", "feedtype", flag_value="rss", default=True,
