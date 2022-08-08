@@ -40,6 +40,11 @@ class MyAppPixivAPI(AppPixivAPI):
         self.expiry = None
         return super().__init__(*kargs, **kwargs)
 
+    def auth(self, *kargs, **kwargs):
+        res = super().auth(*kargs, **kwargs)
+        self.expiry = res["expires_in"] + int(time())
+        return res
+
     def refresh(self):
         CACHEDIR.mkdir(parents=True, exist_ok=True)
 
@@ -53,9 +58,7 @@ class MyAppPixivAPI(AppPixivAPI):
                 self.expiry = cache.get("expiry", None)
 
             if cache is None or self.expiry is None or time() > self.expiry:
-                resp = self.auth(refresh_token=self.refresh_token)
-
-                self.expiry = int(time()) + resp["expires_in"]
+                self.auth(refresh_token=self.refresh_token)
 
                 fp.seek(0, io.SEEK_SET)
                 fp.truncate(0)
