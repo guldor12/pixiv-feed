@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from flask import Flask, request, abort
-from . import NAME, APPDIRS, CACHEDIR, DATADIR, MyAppPixivAPI, select_feed
+from . import NAME, DATADIR, MyAppPixivAPI, select_feed
 
 pixiv = MyAppPixivAPI()
 
@@ -19,10 +19,12 @@ def wrapper(func, *kargs, **kwargs):
     except ValueError:
         abort(404)
 
+
 @app.route("/illust/<feed_type>")
 def illust(feed_type):
     fg = pixiv.user_illusts_feed(**request.args)
     return wrapper(select_feed, fg, feed_type)
+
 
 @app.route("/new_illust/<feed_type>")
 def new_illust(feed_type):

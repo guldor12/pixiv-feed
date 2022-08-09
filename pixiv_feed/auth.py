@@ -5,7 +5,7 @@ from secrets import token_urlsafe
 from sys import exit
 from textwrap import dedent
 from urllib.parse import urlencode
-from webbrowser import open as open_url
+import webbrowser
 
 import requests
 
@@ -41,7 +41,7 @@ def login():
         "client": "pixiv-android",
     }
 
-    open_url(f"{LOGIN_URL}?{urlencode(login_params)}")
+    webbrowser.open(f"{LOGIN_URL}?{urlencode(login_params)}")
 
     print(
         dedent(

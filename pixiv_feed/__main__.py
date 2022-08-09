@@ -11,15 +11,6 @@ def cli():
     pass
 
 
-def select_feed(fg, feed_type):
-    if feed_type == "rss":
-        return fg.rss_str()
-    elif feed_type == "atom":
-        return fg.atom_str()
-    else:
-        raise ValueError
-
-
 # fmt: off
 @cli.command(add_help_option=False, help="Generate and serve RSS/Atom feeds for Pixiv users",
              no_args_is_help=True)
