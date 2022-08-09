@@ -2,7 +2,8 @@ import sqlite3, json
 from pathlib import Path
 
 from flask import g, Flask, request, abort, current_app
-from . import NAME, MyAppPixivAPI, select_feed, exceptions, db as db_
+from . import NAME, MyAppPixivAPI, select_feed, db as db_
+from .exceptions import *
 
 app = Flask(NAME, instance_relative_config=True)
 app.config.from_mapping(
