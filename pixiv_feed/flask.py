@@ -8,7 +8,7 @@ pixiv = MyAppPixivAPI()
 app = Flask(NAME, instance_path=DATADIR)
 app.config.from_mapping(
     SECRET_KEY="dev",
-    DATABASE=Path(app.instance_path) / "cache.sqlite",
+    DATABASE=Path(app.instance_path) / "cache.sqlite3",
 )
 
 Path(app.instance_path).mkdir(parents=True, exist_ok=True)
