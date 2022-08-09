@@ -80,12 +80,12 @@ def login():
 @click.help_option("-h", "--help")
 @click.argument("refresh_token")
 def refresh(refresh_token):
-    db = get_db()
+    db = get_db(Path(app.instance_path) / "cache.sqlite3")
     db.execute(
         "INSERT OR REPLACE INTO data VALUES ('pixiv', ?, 0)",
-        json.dumps({"refresh_token": refresh_token}, separators=",:"),
+        (json.dumps({"refresh_token": refresh_token}, separators=",:"),),
     )
-    db.close()
+    db.commit()
 
 
 if __name__ == "__main__":
