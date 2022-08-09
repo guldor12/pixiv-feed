@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from flask import Flask, request, abort
-from . import NAME, DATADIR, MyAppPixivAPI, select_feed
+from . import NAME, MyAppPixivAPI, select_feed
 
 pixiv = MyAppPixivAPI()
 
-app = Flask(NAME, instance_path=DATADIR)
+app = Flask(NAME, instance_relative_config=True)
 app.config.from_mapping(
     SECRET_KEY="dev",
     DATABASE=Path(app.instance_path) / "cache.sqlite3",
