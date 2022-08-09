@@ -16,18 +16,23 @@ Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 class FlaskAppPixivAPI(MyAppPixivAPI):
     def refresh(self):
         db = get_db()
+        cur = db.cursor()
+        cur.execute(
+            "SELECT value, expires FROM data WHERE key=? LIMIT 1",
+            ("pixiv",),
+        )
+        result = cur.fetchone()
+        if result is None:
+            raise PixivNotAuthorizedException
+        value, expiry = result
+        tokens = json.loads(value)
         try:
-            cur = db.cursor()
-            cur.execute(
-                "SELECT value, expires FROM data WHERE key=? LIMIT 1",
-                ("pixiv",),
-            )
-            value, expiry = cur.fetchone()
-            tokens = json.loads(value)
             self.refresh_token = tokens["refresh_token"]
-            self.access_token = tokens.get("access_token", None)
+            if self.refresh_token is None:
+                raise PixivNotAuthorizedException
         except ValueError:
             raise PixivNotAuthorizedException
+        self.access_token = tokens.get("access_token", None)
 
         return super().refresh()
 
