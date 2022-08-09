@@ -1,8 +1,10 @@
-import sys
+import sys, json
+from pathlib import Path
 import click
 from . import MyAppPixivAPI, select_feed
 from .flask import app
 from .auth import login as pixiv_login
+from .db import get_db
 
 
 @click.group(add_help_option=False)
@@ -52,6 +54,23 @@ def login():
     pixiv.set_auth(auth_data["access_token"], auth_data["refresh_token"])
     pixiv.refresh()
 
+    db = get_db(Path(app.instance_path) / "cache.sqlite3")
+    db.execute(
+        "INSERT OR REPLACE INTO data VALUES (?, ?, ?);",
+        (
+            "pixiv",
+            json.dumps(
+                {
+                    "access_token": pixiv.access_token,
+                    "refresh_token": pixiv.refresh_token,
+                },
+                separators=",:",
+            ),
+            pixiv.expiry,
+        ),
+    )
+    db.commit()
+
 
 @cli.command(
     add_help_option=False,
@@ -61,9 +80,12 @@ def login():
 @click.help_option("-h", "--help")
 @click.argument("refresh_token")
 def refresh(refresh_token):
-    pixiv = MyAppPixivAPI()
-    pixiv.refresh_token = refresh_token
-    pixiv.refresh()
+    db = get_db()
+    db.execute(
+        "INSERT OR REPLACE INTO data VALUES ('pixiv', ?, 0)",
+        json.dumps({"refresh_token": refresh_token}, separators=",:"),
+    )
+    db.close()
 
 
 if __name__ == "__main__":

@@ -1,9 +1,8 @@
+import sqlite3, json
 from pathlib import Path
 
-from flask import Flask, request, abort
-from . import NAME, MyAppPixivAPI, select_feed
-
-pixiv = MyAppPixivAPI()
+from flask import g, Flask, request, abort, current_app
+from . import NAME, MyAppPixivAPI, select_feed, exceptions, db as db_
 
 app = Flask(NAME, instance_relative_config=True)
 app.config.from_mapping(
@@ -12,6 +11,45 @@ app.config.from_mapping(
 )
 
 Path(app.instance_path).mkdir(parents=True, exist_ok=True)
+
+
+class FlaskAppPixivAPI(MyAppPixivAPI):
+    def refresh(self):
+        db = get_db()
+        try:
+            cur = db.cursor()
+            cur.execute(
+                "SELECT value, expires FROM data WHERE key=? LIMIT 1",
+                ("pixiv",),
+            )
+            value, expiry = cur.fetchone()
+            tokens = json.loads(value)
+            self.refresh_token = tokens["refresh_token"]
+            self.access_token = tokens.get("access_token", None)
+        except ValueError:
+            raise PixivNotAuthorizedException
+
+        return super().refresh()
+
+
+pixiv = FlaskAppPixivAPI()
+
+
+def get_db():
+    if "db" not in g:
+        g.db = db_.get_db(current_app.config["DATABASE"])
+    return g.db
+
+
+def close_db(e=None):
+    db = g.pop("db", None)
+
+    if db is not None:
+        db.close()
+
+
+app.teardown_appcontext(close_db)
+
 
 def wrapper(func, *kargs, **kwargs):
     try:

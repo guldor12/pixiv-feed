@@ -46,33 +46,8 @@ class MyAppPixivAPI(AppPixivAPI):
         return res
 
     def refresh(self):
-        CACHEDIR.mkdir(parents=True, exist_ok=True)
-
-        # get cached tokens
-        with open(CACHEDIR / "token.json", "r+") as fp:
-            cache = None
-            if self.access_token is None or self.refresh_token is None:
-                cache = json.load(fp)
-                self.set_auth(cache["access_token"], cache["refresh_token"])
-                self.user_id = cache["user_id"]
-                self.expiry = cache.get("expiry", None)
-
-            if cache is None or self.expiry is None or time() > self.expiry:
-                self.auth(refresh_token=self.refresh_token)
-
-                fp.seek(0, io.SEEK_SET)
-                fp.truncate(0)
-
-                json.dump(
-                    fp=fp,
-                    obj=dict(
-                        user_id=self.user_id,
-                        access_token=self.access_token,
-                        refresh_token=self.refresh_token,
-                        expiry=self.expiry,
-                    ),
-                    separators=(",", ":"),
-                )
+        if self.access_token is None or self.expiry is None or time() > self.expiry:
+            self.auth(refresh_token=self.refresh_token)
 
     @staticmethod
     def _format(str_l, str_j, uid, lang):

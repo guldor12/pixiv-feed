@@ -1,0 +1,2 @@
+class PixivNotAuthorizedException(Exception):
+    pass
