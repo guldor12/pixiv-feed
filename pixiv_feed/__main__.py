@@ -40,8 +40,6 @@ def generate(feedtype, endpoint, language):
     if endpoint == "new_illust":
         sys.stdout.buffer.write(select_feed(pixiv.new_illusts_feed(**kwargs), feedtype))
 
-    return 0
-
 
 @cli.command(add_help_option=False, help="Generate and serve RSS/Atom feeds for Pixiv users")
 @click.help_option("-h", "--help")
@@ -50,7 +48,6 @@ def generate(feedtype, endpoint, language):
 def server(host, port):
     app.run(host=host, port=port)
 
-    return 0
 
 
 # fmt: off
@@ -89,8 +86,6 @@ def login():
     pixiv.set_auth(auth_data["access_token"], auth_data["refresh_token"])
     pixiv.refresh()
 
-    return 0
-
 
 @cli.command(add_help_option=False, help="Add authentication tokens")
 @click.help_option("-h", "--help")
@@ -99,8 +94,6 @@ def refresh(refresh_token):
     pixiv = MyAppPixivAPI()
     pixiv.refresh_token = refresh_token
     pixiv.refresh()
-
-    return 0
 
 
 if __name__ == "__main__":
