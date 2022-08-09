@@ -3,6 +3,7 @@ from hashlib import sha256
 from pprint import pprint
 from secrets import token_urlsafe
 from sys import exit
+from textwrap import dedent
 from urllib.parse import urlencode
 from webbrowser import open as open_url
 
@@ -41,6 +42,35 @@ def login():
     }
 
     open_url(f"{LOGIN_URL}?{urlencode(login_params)}")
+
+    print(
+        dedent(
+            """
+            Instructions:
+            1. In the page just opened in your web browser, open dev console (F12) and switch to network tab.
+
+            2. Enable persistent logging ("Preserve log").
+
+            3. Type into the filter field: callback?
+
+            4. Proceed with Pixiv login.
+
+            5. After logging in you should see a blank page and request that looks like this:
+
+               https://app-api.pixiv.net/web/v1/users/auth/pixiv/callback?state=...&code=....
+
+               Copy value of the code param into the pixiv_auth.py's prompt and hit the Enter key.
+
+            WARNING:
+            The lifetime of code is extremely short, so make sure to minimize delay
+            between step 5 and 6. Otherwise, repeat everything starting step 1.
+
+            If you did everything right and Pixiv did not change their auth flow,
+            the necessary API tokens should be saved to the database.
+            """
+        ).strip(),
+        end="\n\n",
+    )
 
     try:
         code = input("code: ").strip()
