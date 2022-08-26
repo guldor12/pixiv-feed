@@ -100,17 +100,6 @@ class MyAppPixivAPI(AppPixivAPI):
 
         if illust["caption"]:
             body.append(f'<div>{illust["caption"]}</div>')
-        tags = []
-        for tag in illust["tags"]:
-            tags.append(self.tag_html(tag))
-        if tags:
-            body.extend(
-                (
-                    '<div>',
-                    " ".join(tags),
-                    "</div>",
-                )
-            )
         return "".join(body)
 
     def user_illusts_feed(self, **kwargs):
@@ -158,6 +147,11 @@ class MyAppPixivAPI(AppPixivAPI):
             fe.content(body, type="html")
             fe.link(href=url)
 
+            for tag in illust["tags"]:
+                fe.category(term=tag["name"])
+                if tag["translated_name"] is not None:
+                    fe.category(term=tag["translated_name"])
+
         return fg
 
     def new_illusts_feed(self, **kwargs):
@@ -200,6 +194,11 @@ class MyAppPixivAPI(AppPixivAPI):
             fe.published(illust["create_date"])
             fe.content(body, type="html")
             fe.link(href=url)
+
+            for tag in illust["tags"]:
+                fe.category(term=tag["name"])
+                if tag["translated_name"] is not None:
+                    fe.category(term=tag["translated_name"])
 
         return fg
 
