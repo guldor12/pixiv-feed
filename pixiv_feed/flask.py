@@ -1,7 +1,7 @@
 import sqlite3, json
 from pathlib import Path
 
-from flask import g, Flask, request, abort, current_app
+from flask import g, Flask, request, abort, current_app, Response
 from . import NAME, MyAppPixivAPI, select_feed, db as db_
 from .exceptions import *
 
@@ -67,10 +67,10 @@ def wrapper(func, *kargs, **kwargs):
 @app.route("/illust/<feed_type>")
 def illust(feed_type):
     fg = pixiv.user_illusts_feed(**request.args)
-    return wrapper(select_feed, fg, feed_type)
+    return Response(wrapper(select_feed, fg, feed_type), mimetype=f"application/{feed_type}+xml")
 
 
 @app.route("/new_illust/<feed_type>")
 def new_illust(feed_type):
     fg = pixiv.new_illusts_feed(**request.args)
-    return wrapper(select_feed, fg, feed_type)
+    return Response(wrapper(select_feed, fg, feed_type), mimetype=f"application/{feed_type}+xml")
