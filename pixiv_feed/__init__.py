@@ -102,6 +102,33 @@ class MyAppPixivAPI(AppPixivAPI):
             body.append(f'<div>{illust["caption"]}</div>')
         return "".join(body)
 
+    def get_authors_from_illust(illust):
+        return (
+            illust['user']['name'], # display name
+            illust['user']['account'], # username
+        )
+
+    def add_illust_entry(self, feed, illust, **kwargs):
+        language = kwargs.get("lang", "jp")
+        url = self.illust_format(illust["id"], language)
+
+        body = self.illust_html(illust)
+
+        fe = feed.add_entry()
+
+        fe.id(url)
+        fe.title(illust["title"])
+        for author in get_authors_from_illust(illust):
+            fe.author(name=author)
+        fe.published(illust["create_date"])
+        fe.content(body, type="html")
+        fe.link(href=url)
+
+        for tag in illust["tags"]:
+            fe.category(term=tag["name"])
+            if tag["translated_name"] is not None:
+                fe.category(term=tag["translated_name"])
+
     def user_illusts_feed(self, **kwargs):
         assert "id" in kwargs or "id_" in kwargs
 
@@ -134,23 +161,7 @@ class MyAppPixivAPI(AppPixivAPI):
         fg.language(language)
 
         for illust in self.user_illusts(user_id)["illusts"]:
-            url = self.illust_format(illust["id"], language)
-
-            body = self.illust_html(illust)
-
-            fe = fg.add_entry()
-
-            fe.id(url)
-            fe.title(illust["title"])
-            fe.author(name=f"{illust['user']['name']} ({illust['user']['account']})")
-            fe.published(illust["create_date"])
-            fe.content(body, type="html")
-            fe.link(href=url)
-
-            for tag in illust["tags"]:
-                fe.category(term=tag["name"])
-                if tag["translated_name"] is not None:
-                    fe.category(term=tag["translated_name"])
+            self.add_illust_entry(fg, illust)
 
         return fg
 
@@ -182,24 +193,7 @@ class MyAppPixivAPI(AppPixivAPI):
         fg.language(language)
 
         for illust in self.illust_follow()["illusts"]:
-            url = self.illust_format(illust["id"], language)
-
-            body = self.illust_html(illust)
-
-            fe = fg.add_entry()
-
-            fe.id(url)
-            fe.title(illust["title"])
-            fe.author(name=illust['user']['name']) # display name
-            fe.author(name=illust['user']['account']) # username
-            fe.published(illust["create_date"])
-            fe.content(body, type="html")
-            fe.link(href=url)
-
-            for tag in illust["tags"]:
-                fe.category(term=tag["name"])
-                if tag["translated_name"] is not None:
-                    fe.category(term=tag["translated_name"])
+            self.add_illust_entry(fg, illust)
 
         return fg
 
