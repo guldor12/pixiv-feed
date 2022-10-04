@@ -7,7 +7,7 @@ from appdirs import AppDirs
 from pixivpy3 import *
 from feedgen.feed import FeedGenerator
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "MyAppPixivAPI",
