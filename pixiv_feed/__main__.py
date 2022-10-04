@@ -1,7 +1,7 @@
 import sys, json
 from pathlib import Path
 import click
-from . import MyAppPixivAPI, select_feed
+from . import __version__, MyAppPixivAPI, select_feed
 from .flask import app
 from .auth import login as pixiv_login
 from .db import get_db
@@ -9,6 +9,7 @@ from .db import get_db
 
 @click.group(add_help_option=False)
 @click.help_option("-h", "--help")
+@click.version_option(__version__)
 def cli():
     pass
 
