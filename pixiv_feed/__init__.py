@@ -104,12 +104,6 @@ class MyAppPixivAPI(AppPixivAPI):
             body.append(f'<div>{illust["caption"]}</div>')
         return "".join(body)
 
-    def get_authors_from_illust(illust):
-        return (
-            illust['user']['name'], # display name
-            illust['user']['account'], # username
-        )
-
     def add_illust_entry(self, feed, illust, **kwargs):
         language = kwargs.get("lang", "jp")
         url = self.illust_format(illust["id"], language)
@@ -120,8 +114,8 @@ class MyAppPixivAPI(AppPixivAPI):
 
         fe.id(url)
         fe.title(illust["title"])
-        for author in get_authors_from_illust(illust):
-            fe.author(name=author)
+        fe.author(name=illust['user']['name']) # display name
+        fe.author(name=illust['user']['account']) # username
         fe.published(illust["create_date"])
         fe.content(body, type="html")
         fe.link(href=url)
